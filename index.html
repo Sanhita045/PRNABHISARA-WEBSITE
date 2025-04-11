@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Paranabhisara Blood Bank</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f9f9f9; color: #333; }
+    header, footer { background: #c62828; color: white; text-align: center; padding: 1em; }
+    nav a { margin: 0 1em; color: white; text-decoration: none; font-weight: bold; }
+    section { padding: 2em; }
+    .form-group { margin-bottom: 1em; }
+    input, select, textarea {
+      width: 100%; padding: 0.5em; border: 1px solid #ccc; border-radius: 4px;
+    }
+    button {
+      padding: 0.75em 1.5em; background: #c62828; color: white;
+      border: none; border-radius: 4px; cursor: pointer;
+    }
+    .message { margin-top: 1em; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-top: 2em; display: none; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #e53935; color: white; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Paranabhisara Blood Bank</h1>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#form">Appointment</a>
+      <a href="#experience">Experience</a>
+    </nav>
+  </header>
+
+  <section id="about">
+    <h2>About Us</h2>
+    <p>We connect donors and receivers with real-time appointments, live tracking, and personalized care. Paranabhisara is a mission to save lives with simplicity and technology.</p>
+    <img src="https://source.unsplash.com/800x300/?blood,donation" width="100%" />
+  </section>
+
+  <section id="form">
+    <h2>Book an Appointment</h2>
+    <form id="appointmentForm">
+      <div class="form-group"><label>Role:</label>
+        <select name="role" required>
+          <option value="">--Select--</option>
+          <option>Donor</option><option>Receiver</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Full Name:</label>
+        <input type="text" name="name" required/>
+      </div>
+      <div class="form-group"><label>Email:</label>
+        <input type="email" name="email" required/>
+      </div>
+      <div class="form-group"><label>Blood Group:</label>
+        <select name="bloodGroup" required>
+          <option value="">--Select--</option>
+          <option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option>
+          <option>O+</option><option>O-</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Location:</label>
+        <input type="text" name="location" required/>
+      </div>
+      <div class="form-group"><label>Preferred Date:</label>
+        <input type="date" name="date" required/>
+      </div>
+      <div class="form-group"><label>Preferred Time:</label>
+        <input type="time" name="time" required/>
+      </div>
+      <div class="form-group"><label>Previous Experience:</label>
+        <textarea name="experience"></textarea>
+      </div>
+      <button type="submit">Submit</button>
+      <div class="message" id="msg"></div>
+    </form>
+  </section>
+
+  <section id="experience">
+    <h2>People’s Experiences</h2>
+    <p>We will soon feature real stories of how Paranabhisara saved lives and built a caring community.</p>
+  </section>
+
+  <section id="admin">
+    <h2>Admin - Appointments View</h2>
+    <p>This section is visible only if you visit this ID directly. Do not share your sheet publicly.</p>
+    <table id="appointmentsTable">
+      <thead>
+        <tr>
+          <th>Timestamp</th><th>Role</th><th>Name</th><th>Email</th><th>Blood Group</th>
+          <th>Location</th><th>Date</th><th>Time</th><th>Status</th><th>Experience</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>© 2025 Paranabhisara Blood Bank. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('appointmentForm');
+    const msg = document.getElementById('msg');
+    const sheetID = 'YOUR_SHEET_ID';
+    const scriptURL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+    const sheetDataURL = `https://opensheet.vercel.app/${sheetID}/Appointments`;
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      fetch("https://script.google.com/macros/s/AKfycbweXh8Rmw-0QvBV9Erd8dSWys6KkZpyu7sP7AhgbmfaXkGYCfzMzqkll124Wrn5tEjY/exec", {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {'Content-Type': 'application/json'}
+      })
+      .then(res => res.json())
+      .then(() => {
+        msg.textContent = 'Appointment submitted successfully!';
+        form.reset();
+      })
+      .catch(() => msg.textContent = 'Submission failed. Try again.');
+    });
+
+    // Admin table loader
+    fetch(sheetDataURL)
+      .then(res => res.json())
+      .then(rows => {
+        const table = document.getElementById('appointmentsTable');
+        const tbody = table.querySelector('tbody');
+        rows.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${row.Timestamp}</td><td>${row.Role}</td><td>${row.Name}</td><td>${row.Email}</td>
+            <td>${row.BloodGroup}</td><td>${row.Location}</td><td>${row.Date}</td><td>${row.Time}</td>
+            <td>${row.Status}</td><td>${row.Experience}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        table.style.display = 'table';
+      });
+  </script>
+</body>
+</html>
